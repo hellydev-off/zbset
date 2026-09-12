@@ -1,11 +1,28 @@
 services:
+  core-service:
+    build:
+      context: ./services/core-service
+      dockerfile: Dockerfile
+
+    container_name: core-service
+
+    command: uv run python manage.py runserver 0.0.0.0:8000
+    
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - ./.env
+
+    depends_on:
+      - postgres
+
+    restart: unless-stopped
+
   postgres:
     image: postgres:18
     restart: always
     
-    volumes:
-      - postgres_data:/var/lib/postgresql
-
     environment: 
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD} 
@@ -13,5 +30,4 @@ services:
     ports:
      - "5432:5432"
 
-volumes:
-  postgres_data: {}
+  

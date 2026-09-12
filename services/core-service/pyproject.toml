@@ -1,0 +1,19 @@
+[project]
+name = "core-service"
+version = "0.1.0"
+description = "Auth + Content for ZBSet"
+readme = "README.md"
+authors = [
+    { name = "ialloni", email = "sdls2000@bk.ru" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "django>=6.1.1",
+    "django-rest-framework>=0.1.0",
+    "environs>=15.2.0",
+    "psycopg>=3.3.5",
+    "psycopg-binary>=3.3.5",
+]
+
+[tool.uv]
+package = false
