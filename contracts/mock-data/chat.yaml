@@ -1,0 +1,10 @@
+messageId: 123456
+type: "direct"
+thread: 123456 # id пользователя, который отправил сообщение
+messageType: incoming # outgoing - если исходящее
+text: "Привет"
+isViewed: false # true - если просмотрено
+content:
+  isContent: true # false - если нет видео/фото/аудио
+  type: photo # video - если видео, audio - если аудио
+  url: "https://photo.jpg"

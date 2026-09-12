@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Chats {
+  id              Int      @id @default(autoincrement())
+  type            String   // "direct" | "ai_persona"
+  participant_ids Int[]
+  persona_id      Int?     // % заполнено только для type = "ai_persona"
+  created_at      DateTime @default(now())
+
+  messages Messages[]
+}
+
+model Messages {
+  id           Int      @id @default(autoincrement())
+  chat_id      Int
+  sender_id    Int      // абсолютный id отправителя (юзер ИЛИ персонаж) — без autoincrement
+  sender_type  String   // "user" | "persona"
+  text         String?
+  is_viewed    Boolean  @default(false)
+  content      Json?
+  sent_at      DateTime @default(now())
+  updated_at   DateTime?
+
+  chat Chats @relation(fields: [chat_id], references: [id])
+}
+
+
+
