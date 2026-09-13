@@ -9,3 +9,9 @@ export const sendMessageSchema = z.object({
     content: z.object(),
   }),
 });
+
+export const chatIdShema = z.object({
+  body: z.object({
+    chat_id: z.number(),
+  }),
+});

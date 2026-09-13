@@ -14,6 +14,7 @@ console.log({
 
 const generateToken = async () => {
   const body = {
+    id: 13,
     sub: "9c858901-8a57-4791-81fe-4c455b099bc9",
     email: "user@example.com",
     roles: ["user"],

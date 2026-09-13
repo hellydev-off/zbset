@@ -17,3 +17,21 @@ export function createMessage(data) {
     },
   });
 }
+
+export async function getChatMessages(chat_id) {
+  return await prisma.messages.findMany({
+    where: {
+      chat_id: chat_id,
+    },
+  });
+}
+
+export async function updateMessage(id, newMessage) {
+  return await prisma.messages.update({
+    where: { id: id },
+    data: {
+      text: newMessage,
+      updated_at: new Date(),
+    },
+  });
+}

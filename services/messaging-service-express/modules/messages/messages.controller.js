@@ -9,3 +9,14 @@ export async function sendMessage(req, res, next) {
     console.error(error);
   }
 }
+
+export async function getChatMessages(req, res, next) {
+  try {
+    const result = await messagesService.getChatMessages(
+      req.validated.body.chat_id,
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    console.error(error);
+  }
+}

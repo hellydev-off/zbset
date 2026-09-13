@@ -7,7 +7,7 @@ import * as controller from "./chats.controller.js";
 const router = Router();
 
 // router.post("/", validate(createUserSchema), controller.createUser);
-// router.get("/:id", validate(getUserSchema), controller.getUser);
+router.get("/", controller.getChats);
 router.post("/create", validate(createChatSchema), controller.createChat);
 
 export default router;

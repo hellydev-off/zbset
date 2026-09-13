@@ -8,9 +8,6 @@ services:
 
     command: uv run python manage.py runserver 0.0.0.0:8000
 
-    volumes:
-      - ./services/core-service:/app
-
     ports:
       - "8000:8000"
 
@@ -35,7 +32,4 @@ services:
       - postgres_data:/var/lib/postgresql
 
     ports:
-      - "5432:5432"
-
-volumes:
-  postgres_data:
+      - "5433:5432"
