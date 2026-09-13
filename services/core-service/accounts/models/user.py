@@ -3,25 +3,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField
 
-class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(
-    primary_key=True,
-    default=uuid.uuid4,
-    editable=False,
-    )
-
-    email = models.EmailField(
-    unique=True,
-    )
-
-    username = models.CharField(
-    max_length=30,
-    unique=True,
-    )
-    phone_number = PhoneNumberField(blank=True, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
         if not email:
@@ -44,3 +25,29 @@ class UserManager(BaseUserManager):
             raise ValueError("Super user must have is_superuser=True")
         super_user = self.create_user(email, username, password, **extra_fields)
         return super_user
+
+
+        
+class User(AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(
+    primary_key=True,
+    default=uuid.uuid4,
+    editable=False,
+    )
+
+    email = models.EmailField(
+    unique=True,
+    )
+
+    username = models.CharField(
+    max_length=30,
+    unique=True,
+    )
+    phone_number = PhoneNumberField(blank=True, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    objects = UserManager()
+    
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]

@@ -16,3 +16,7 @@ COPY .python-version .
 RUN uv sync
 
 COPY . . 
+
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
