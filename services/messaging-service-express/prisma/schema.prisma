@@ -12,6 +12,8 @@ model Chats {
   participant_ids Int[]
   persona_id      Int?     // % заполнено только для type = "ai_persona"
   created_at      DateTime @default(now())
+  last_message Json? @default("{}")
+  pin_message Json? @default("{}")
 
   messages Messages[]
 }
@@ -23,7 +25,10 @@ model Messages {
   sender_type  String   // "user" | "persona"
   text         String?
   is_viewed    Boolean  @default(false)
+  is_pin Boolean @default(false)
   content      Json?
+  reaction String?
+  answer_to Json?
   sent_at      DateTime @default(now())
   updated_at   DateTime?
 
