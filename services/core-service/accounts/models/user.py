@@ -1,7 +1,18 @@
 import uuid
-from django.db import models
+from django.db import connection, models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+def _next_numeric_id():
+    # numeric_id не может опираться на Python-дефолт поля (Django всегда
+    # шлёт значение явно в INSERT, поэтому дефолт колонки в Postgres сам по
+    # себе не сработал бы) — достаём следующее значение из той же
+    # SEQUENCE, что использует и сама колонка.
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT nextval('accounts_user_numeric_id_seq')")
+        return cursor.fetchone()[0]
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -10,7 +21,12 @@ class UserManager(BaseUserManager):
         if not password:
             raise ValueError("Password is required")
         norm_email = self.normalize_email(email)
-        user = User(email=norm_email, username=username, **extra_fields)
+        user = User(
+            email=norm_email,
+            username=username,
+            numeric_id=_next_numeric_id(),
+            **extra_fields,
+        )
         user.set_password(password)
         user.save()
         return user
@@ -38,7 +54,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     # messaging-service-express (Prisma) хранит sender_id/participant_ids как
     # Int — UUID туда не положить. numeric_id — отдельный автоинкрементный
     # id только для интеграции с ним, в самом Django ни на что не влияет.
-    numeric_id = models.AutoField(unique=True, editable=False)
+    # AutoField нельзя не-PK (fields.E100), поэтому это обычное поле, а
+    # автоинкремент даёт Postgres SEQUENCE, заведённая в миграции руками.
+    numeric_id = models.PositiveIntegerField(unique=True, editable=False)
 
     email = models.EmailField(
     unique=True,
