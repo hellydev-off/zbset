@@ -22,8 +22,8 @@ class LoginView(APIView):
         user_data.is_valid(raise_exception=True)
         user = user_data.validated_data["user"]
         jwt_service = JWTService()
-        access = jwt_service.create_access_token(str(user.id))
-        refresh = jwt_service.create_refresh_token(str(user.id))
+        access = jwt_service.create_access_token(str(user.id), user.numeric_id)
+        refresh = jwt_service.create_refresh_token(str(user.id), user.numeric_id)
         return Response(
             {
                 "access_token": access,
@@ -42,7 +42,7 @@ class RefreshView(APIView):
             payload = jwt_service.decode_refresh_token(
                 user_data.validated_data["refresh_token"]
             )
-            new_access_token = jwt_service.create_access_token(payload["sub"])
+            new_access_token = jwt_service.create_access_token(payload["sub"], payload.get("id"))
         except ValueError:
             return Response(
                 data={"detail": "Invalid refresh token"},

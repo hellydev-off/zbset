@@ -35,6 +35,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     editable=False,
     )
 
+    # messaging-service-express (Prisma) хранит sender_id/participant_ids как
+    # Int — UUID туда не положить. numeric_id — отдельный автоинкрементный
+    # id только для интеграции с ним, в самом Django ни на что не влияет.
+    numeric_id = models.AutoField(unique=True, editable=False)
+
     email = models.EmailField(
     unique=True,
     )
