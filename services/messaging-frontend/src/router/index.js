@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { auth } from "../store/auth";
-import TokenLogin from "../views/TokenLogin.vue";
+import AuthView from "../views/AuthView.vue";
 import AppShell from "../views/AppShell.vue";
 import Feed from "../views/Feed.vue";
 import Profile from "../views/Profile.vue";
@@ -10,7 +10,7 @@ import ChatView from "../views/ChatView.vue";
 import SocketTester from "../views/SocketTester.vue";
 
 const routes = [
-  { path: "/", name: "login", component: TokenLogin },
+  { path: "/", name: "login", component: AuthView },
   {
     path: "/",
     component: AppShell,
