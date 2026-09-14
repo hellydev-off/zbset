@@ -10,6 +10,7 @@ services:
 
     volumes:
       - ./services/core-service:/app
+      - core_service_venv:/app/.venv
 
     ports:
       - "8000:8000"
@@ -39,3 +40,4 @@ services:
 
 volumes:
   postgres_data:
+  core_service_venv:
