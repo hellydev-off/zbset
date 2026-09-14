@@ -25,6 +25,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "accounts.User"
 
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -15,6 +15,7 @@ dependencies = [
     "psycopg>=3.3.5",
     "psycopg-binary>=3.3.5",
     "pyjwt>=2.14.0",
+    "gunicorn>=23.0.0",
 ]
 
 [tool.uv]
