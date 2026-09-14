@@ -42,7 +42,7 @@ services:
       - messaging_storage:/app/storage
 
     environment:
-      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/messaging
       JWT_SECRET: ${MESSAGING_JWT_SECRET:-supersecretkey}
       JWT_EXPIRES: "24h"
       NODE_ENV: production
