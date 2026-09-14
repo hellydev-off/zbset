@@ -43,7 +43,9 @@ services:
 
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/messaging
-      JWT_SECRET: ${MESSAGING_JWT_SECRET:-supersecretkey}
+      # общий секрет с core-service (Django JWT_SECRET_KEY) — токены
+      # auth-service должны верифицироваться и здесь тем же ключом
+      JWT_SECRET: ${JWT_SECRET_KEY}
       JWT_EXPIRES: "24h"
       NODE_ENV: production
       LOG_LEVEL: info
