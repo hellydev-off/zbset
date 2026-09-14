@@ -15,12 +15,10 @@ console.log({
 const generateToken = async () => {
   const body = {
     id: 13,
-    sub: "9c858901-8a57-4791-81fe-4c455b099bc9",
     email: "user@example.com",
     roles: ["user"],
-    session_id: "b3c1f9e0-4a2d-4e3f-9c1a-2b3c4d5e6f7a",
-    iss: "auth-service",
-    aud: "social-app",
+    username: "Helly",
+    phone_number: 79228556998,
   };
 
   const token = jwt.sign({ ...body }, JWT_SECRET, {

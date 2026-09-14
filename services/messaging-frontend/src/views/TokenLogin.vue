@@ -16,7 +16,7 @@ function submit() {
   }
   try {
     setToken(value);
-    router.push({ name: "chats" });
+    router.push({ name: "feed" });
   } catch (e) {
     error.value = "Не удалось разобрать токен: " + e.message;
   }

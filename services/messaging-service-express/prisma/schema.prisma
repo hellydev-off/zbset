@@ -8,32 +8,48 @@ datasource db {
 
 model Chats {
   id              Int      @id @default(autoincrement())
-  type            String   // "direct" | "ai_persona"
+  type            String
   participant_ids Int[]
-  persona_id      Int?     // % заполнено только для type = "ai_persona"
+  persona_id      Int?
   created_at      DateTime @default(now())
-  last_message Json? @default("{}")
-  pin_message Json? @default("{}")
+  last_message    Json?    @default("{}")
+  pin_message     Json?    @default("{}")
+  is_pin Boolean @default(false)
 
-  messages Messages[]
+  messages    Messages[]
+  attachments Attachment[]   // ← добавили обратную связь
 }
 
 model Messages {
-  id           Int      @id @default(autoincrement())
-  chat_id      Int
-  sender_id    Int      // абсолютный id отправителя (юзер ИЛИ персонаж) — без autoincrement
-  sender_type  String   // "user" | "persona"
-  text         String?
-  is_viewed    Boolean  @default(false)
-  is_pin Boolean @default(false)
-  content      Json?
-  reaction String?
-  answer_to Json?
-  sent_at      DateTime @default(now())
-  updated_at   DateTime?
+  id            Int      @id @default(autoincrement())
+  chat_id       Int
+  sender_id     Int
+  sender_type   String
+  text          String?
+  is_viewed     Boolean  @default(false)
+  is_pin        Boolean  @default(false)
+  content       Json?
+  reaction      String?
+  answer_to     Json?
+  attachment_id Int?              // ← добавили FK на вложение
+  sent_at       DateTime @default(now())
+  updated_at    DateTime?
 
-  chat Chats @relation(fields: [chat_id], references: [id])
+  chat       Chats       @relation(fields: [chat_id], references: [id])
+  attachment Attachment? @relation(fields: [attachment_id], references: [id])  // ← связь один-к-одному
 }
 
+model Attachment {
+  id            Int      @id @default(autoincrement())
+  chat_id       Int
+  uploader_id   Int
+  original_name String
+  mime_type     String
+  size          Int
+  storage_key   String
+  url           String
+  created_at    DateTime @default(now())
 
-
+  chat     Chats      @relation(fields: [chat_id], references: [id])  // ← связь с чатом
+  messages Messages[]                                                  // ← обратная связь (одно вложение — в одном сообщении)
+}

@@ -99,3 +99,31 @@ export async function updatePinMessage(id, station) {
     },
   });
 }
+
+export async function addAnswerMessage(
+  messageId,
+  messageAnswerId,
+  sender_id,
+  text,
+  content,
+) {
+  return await prisma.messages.update({
+    where: { id: messageId },
+    data: {
+      answer_to: {
+        id: messageAnswerId,
+        sender_id: sender_id,
+        text: text,
+        content: content,
+      },
+    },
+  });
+}
+
+export async function deleteMessages(chatId) {
+  return await prisma.messages.deleteMany({
+    where: {
+      chat_id: chatId,
+    },
+  });
+}

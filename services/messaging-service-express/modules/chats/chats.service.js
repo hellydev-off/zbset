@@ -91,3 +91,26 @@ export async function deletePinAndChangeLastMessage(chat_id, messageId) {
     console.error(error);
   }
 }
+
+export async function changePinChat(chatId, station) {
+  try {
+    return await chatsRepository.changePinChat(chatId, station);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteChatHistory(chatId) {
+  try {
+    const deleteChatInfo = await chatsRepository.deleteChatHistory(chatId);
+    const deleteMessage = await messageRepository.deleteMessages(chatId);
+    return {
+      result: {
+        deleteChatInfo,
+        deleteChatInfo,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+  }
+}

@@ -16,3 +16,19 @@ export async function listChats(userId) {
   const { data } = await api.get("/chat", { params: { id: userId } });
   return data;
 }
+
+// POST /api/chat/changePin — закрепить/открепить чат в списке (is_pin).
+export async function changePinChat(chatId, pinned) {
+  const { data } = await api.post("/chat/changePin", { chatId, station: pinned });
+  return data;
+}
+
+// POST /api/chat/deleteChatHistory — удаляет ВСЕ сообщения чата и сбрасывает
+// last_message/pin_message. Сервер также шлёт socket-эмит "chat:delete_chat",
+// но сейчас он приходит с payload (null, null) — см. отчёт в чате с бэкендером,
+// поэтому фронт не полагается на этот эмит для собственного действия
+// пользователя, только опционально — для синхронизации у других участников.
+export async function deleteChatHistory(chatId) {
+  const { data } = await api.post("/chat/deleteChatHistory", { chatId });
+  return data;
+}

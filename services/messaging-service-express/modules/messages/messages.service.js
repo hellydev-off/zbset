@@ -1,8 +1,33 @@
 import * as messagesRepository from "./messages.repository.js";
+import * as chatService from "../chats/chats.service.js";
 
 export async function sendMessage(data) {
   try {
-    return await messagesRepository.createMessage(data);
+    const saveMessage = await messagesRepository.createMessage({
+      chat_id: data.chatId,
+      sender_id: data.user.id,
+      sender_type: data.user.roles[0],
+      text: data.text,
+      content: data.content,
+    });
+
+    const updateChatLastMessage = await chatService.updateLastMessage(
+      data.chatId,
+      data.user.id,
+      data.text,
+      data.content,
+    );
+
+    const changeManyViewed = await messagesRepository.changeManyViewed(
+      data.chatId,
+      data.user.id,
+    );
+
+    return {
+      message: saveMessage,
+      updateChatLastMessage: updateChatLastMessage,
+      changeManyViewed: changeManyViewed,
+    };
   } catch (error) {
     console.error(error);
   }
@@ -71,6 +96,34 @@ export async function changeViewed(messageId, chat_id, sender_id) {
 export async function updatePinMessage(id, station) {
   try {
     return messagesRepository.updatePinMessage(id, station);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function addAnswerMessage(
+  messageId,
+  messageAnswerId,
+  sender_id,
+  text,
+  content,
+) {
+  try {
+    return await messagesRepository.addAnswerMessage(
+      messageId,
+      messageAnswerId,
+      sender_id,
+      text,
+      content,
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteMessages(chatId) {
+  try {
+    return messagesRepository.deleteMessages(chatId);
   } catch (error) {
     console.error(error);
   }

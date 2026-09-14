@@ -11,7 +11,7 @@ const router = Router();
 
 router.post(
   "/sendMessage",
-  validate(sendMessageSchema),
+  // validate(sendMessageSchema),
   controller.sendMessage,
 );
 

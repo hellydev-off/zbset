@@ -28,6 +28,21 @@ const messageIdForUpdate = ref("");
 const newTextForUpdate = ref("");
 const chatIdForUpdate = ref("");
 
+const messageIdForPin = ref("");
+const chatIdForPin = ref("");
+
+const messageIdForUnpin = ref("");
+const chatIdForUnpin = ref("");
+
+const messageIdForDelete = ref("");
+const chatIdForDelete = ref("");
+
+const originalIdForAnswer = ref("");
+const originalTextForAnswer = ref("");
+const originalSenderForAnswer = ref("");
+const replyMessageIdForAnswer = ref("");
+const chatIdForAnswer = ref("");
+
 const customEventName = ref("");
 const customPayload = ref("{}");
 
@@ -147,10 +162,53 @@ function updateMessage() {
   emit("message:update", { id, newMessage: newTextForUpdate.value, chatId });
 }
 
+function pinMessage() {
+  const messageId = Number(messageIdForPin.value);
+  const chatId = Number(chatIdForPin.value);
+  if (Number.isNaN(messageId) || Number.isNaN(chatId)) return;
+  emit("message:pin", { chatId, messageId });
+}
+
+function unpinMessage() {
+  const chatId = Number(chatIdForUnpin.value);
+  const messageId = Number(messageIdForUnpin.value);
+  if (Number.isNaN(chatId) || Number.isNaN(messageId)) return;
+  emit("message:unpin", { chatId, messageId });
+}
+
+function deleteMessage() {
+  const messageId = Number(messageIdForDelete.value);
+  const chatId = Number(chatIdForDelete.value);
+  if (Number.isNaN(messageId) || Number.isNaN(chatId)) return;
+  emit("message:delete", { chatId, messageId });
+}
+
+function sendAnswer() {
+  const messageId = Number(replyMessageIdForAnswer.value);
+  const messageAnswerId = Number(originalIdForAnswer.value);
+  const chatId = Number(chatIdForAnswer.value);
+  const sender_id = Number(originalSenderForAnswer.value);
+  if ([messageId, messageAnswerId, chatId, sender_id].some(Number.isNaN)) return;
+  emit("message:add_answer", {
+    chatId,
+    messageId,
+    messageAnswerId,
+    sender_id,
+    text: originalTextForAnswer.value,
+    content: {},
+  });
+}
+
 function startTyping() {
   const chatId = Number(chatIdForTyping.value);
   if (Number.isNaN(chatId)) return;
   emit("typing:start", { chatId });
+}
+
+function stopTypingManual() {
+  const chatId = Number(chatIdForTyping.value);
+  if (Number.isNaN(chatId)) return;
+  emit("typing:stop", { chatId });
 }
 
 function emitCustom() {
@@ -186,7 +244,12 @@ onUnmounted(disconnect);
 </script>
 
 <template>
-  <div class="wrap">
+  <div class="page">
+    <header class="page-header">
+      <router-link :to="{ name: 'chats' }">&larr; Чаты</router-link>
+      <h2>Тестер сокетов</h2>
+    </header>
+    <div class="wrap">
     <section class="connection">
       <h3>Соединение</h3>
       <div class="row">
@@ -282,10 +345,63 @@ onUnmounted(disconnect);
         </div>
       </div>
 
+      <div class="msg-form">
+        <div class="action-row">
+          <code>message:pin</code>
+          <input v-model="messageIdForPin" placeholder="id сообщения" inputmode="numeric" />
+          <input v-model="chatIdForPin" placeholder="chatId" inputmode="numeric" />
+        </div>
+        <div class="action-row">
+          <button class="primary" @click="pinMessage" :disabled="!isConnected">
+            Отправить message:pin
+          </button>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <code>message:unpin</code>
+        <input v-model="messageIdForUnpin" placeholder="id сообщения" inputmode="numeric" />
+        <input v-model="chatIdForUnpin" placeholder="chatId" inputmode="numeric" />
+        <button @click="unpinMessage" :disabled="!isConnected">Отправить</button>
+      </div>
+
+      <div class="action-row">
+        <code>message:delete</code>
+        <input v-model="messageIdForDelete" placeholder="id сообщения" inputmode="numeric" />
+        <input v-model="chatIdForDelete" placeholder="chatId" inputmode="numeric" />
+        <button @click="deleteMessage" :disabled="!isConnected">Отправить</button>
+      </div>
+
+      <div class="msg-form">
+        <div class="action-row">
+          <code>message:add_answer</code>
+          <input v-model="chatIdForAnswer" placeholder="chatId" inputmode="numeric" />
+          <input v-model="replyMessageIdForAnswer" placeholder="id своего соо" inputmode="numeric" />
+        </div>
+        <div class="action-row">
+          <input v-model="originalIdForAnswer" placeholder="id оригинала" inputmode="numeric" />
+          <input v-model="originalSenderForAnswer" placeholder="sender_id оригинала" inputmode="numeric" />
+        </div>
+        <div class="action-row">
+          <input v-model="originalTextForAnswer" placeholder="текст оригинала" class="grow" />
+        </div>
+        <div class="action-row">
+          <button class="primary" @click="sendAnswer" :disabled="!isConnected">
+            Отправить message:add_answer
+          </button>
+        </div>
+      </div>
+
       <div class="action-row">
         <code>typing:start</code>
         <input v-model="chatIdForTyping" placeholder="chatId" inputmode="numeric" />
         <button @click="startTyping" :disabled="!isConnected">Отправить</button>
+      </div>
+
+      <div class="action-row">
+        <code>typing:stop</code>
+        <input v-model="chatIdForTyping" placeholder="chatId" inputmode="numeric" />
+        <button @click="stopTypingManual" :disabled="!isConnected">Отправить</button>
       </div>
 
       <h3>Произвольное событие</h3>
@@ -334,11 +450,40 @@ onUnmounted(disconnect);
         <p v-if="log.length === 0" class="hint">Пока пусто — подключись и что-нибудь отправь</p>
       </div>
     </section>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  flex: 0 0 auto;
+}
+
+.page-header a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.page-header h2 {
+  font-size: 16px;
+}
+
 .wrap {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
