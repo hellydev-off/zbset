@@ -16,6 +16,9 @@ class JWTService:
             # sender_id/participant_id — кладём его же сюда, чтобы токен
             # auth-service подходил и для мессенджера без правок на его стороне.
             "id": numeric_id,
+            # messages.service.js читает data.user.roles[0] как sender_type —
+            # без этого поля падает с TypeError на любой реальной отправке
+            "roles": ["user"],
             "type": "access",
             "iat": now,
             "exp": now + timedelta(minutes=15),
