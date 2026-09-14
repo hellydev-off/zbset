@@ -1,9 +1,9 @@
+import { createServer } from "http";
 import { createApp } from "./app.js";
-
-const PORT = process.env.PORT || 3000;
+import { initSocket } from "./sockets/index.js";
 
 const app = createApp();
+const httpServer = createServer(app);
+initSocket(httpServer);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+httpServer.listen(3000, () => console.log("running on 3000"));

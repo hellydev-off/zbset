@@ -10,3 +10,14 @@ export async function createChat(req, res, next) {
     console.error(error);
   }
 }
+
+export async function getChats(req, res, next) {
+  try {
+    console.log(req.query.id);
+    const getChats = await chatsService.getChats(req.query.id);
+
+    res.status(201).json(getChats);
+  } catch (error) {
+    console.error(error);
+  }
+}
