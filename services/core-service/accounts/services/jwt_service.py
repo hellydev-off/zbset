@@ -1,7 +1,6 @@
 from datetime import UTC, datetime, timedelta
 
 import jwt
-
 from config.settings import JWT_SECRET_KEY
 
 
