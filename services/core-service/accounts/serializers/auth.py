@@ -1,5 +1,7 @@
 from rest_framework import serializers
+
 from ..models.user import User
+
 
 class UserRegistrationSerializer(serializers.Serializer):
     email = serializers.EmailField()
@@ -19,3 +21,33 @@ class UserRegistrationSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)
+
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs):
+        email = attrs["email"]
+        password = attrs["password"]
+        try:
+            user: User = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("Invalid email or password")
+
+        if not user.check_password(password):
+            raise serializers.ValidationError("Invalid email or password")
+
+        if not user.is_active:
+            raise serializers.ValidationError("User is inactive")
+        attrs["user"] = user
+        return attrs
+
+
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField(write_only=True)
+
+    def validate_refresh_token(self, value):
+        if not value:
+            raise serializers.ValidationError("Invalid token")
+        return value

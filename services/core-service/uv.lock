@@ -22,6 +22,7 @@ dependencies = [
     { name = "environs" },
     { name = "psycopg" },
     { name = "psycopg-binary" },
+    { name = "pyjwt" },
 ]
 
 [package.metadata]
@@ -32,6 +33,7 @@ requires-dist = [
     { name = "environs", specifier = ">=15.2.0" },
     { name = "psycopg", specifier = ">=3.3.5" },
     { name = "psycopg-binary", specifier = ">=3.3.5" },
+    { name = "pyjwt", specifier = ">=2.14.0" },
 ]
 
 [[package]]
@@ -147,6 +149,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/72/33f293c1d3ee9114f47e9ef4880f31c9de864e84a9b09454c26e106c25ed/psycopg_binary-3.3.5-cp314-cp314-musllinux_1_2_riscv64.whl", hash = "sha256:8dbd694f3741dd4ac5bc60b70e17f7841aefb3f0f38cef4d2756de270e03af43", size = 4011958, upload-time = "2026-08-31T22:45:24.792Z" },
     { url = "https://files.pythonhosted.org/packages/b7/c9/8e38840e5a7d006987bbc9acb29951912253fa50549a4db92b3aa535f089/psycopg_binary-3.3.5-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:14f432430fd9e1a9e7d9ab2fe14956c77f5d074ebdc556a1ad04e9a1bd3fca04", size = 4323273, upload-time = "2026-08-31T22:45:32.973Z" },
     { url = "https://files.pythonhosted.org/packages/fc/c7/b7ebf601c307f93e7c4c4ebac0edc9db3b2729ca038efe700a18f86b5517/psycopg_binary-3.3.5-cp314-cp314-win_amd64.whl", hash = "sha256:df209e64674a34b41662c67fdc8b4e0ffd77d2136393790691d086a09f9a6cab", size = 3745885, upload-time = "2026-08-31T22:45:40.537Z" },
+]
+
+[[package]]
+name = "pyjwt"
+version = "2.14.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/af/c3/8a3b59c25070cc61dc517fbdfa5dc0904670c96f605cc69759dc09166b99/pyjwt-2.14.0.tar.gz", hash = "sha256:77283c83fb56ecf566a886c757a714bc83668e38156de2cce8263302f42e0b86", size = 113177, upload-time = "2026-09-11T13:11:54.638Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/9c/97/672cb32ce0dfea44b740cb7b4f97038463b9cf7c0ead1aacf595572851d6/pyjwt-2.14.0-py3-none-any.whl", hash = "sha256:ad0cef71c756a56e74863c2919cf0985f72decbcfcb550ee2f422e7c62b5eedc", size = 32896, upload-time = "2026-09-11T13:11:53.409Z" },
 ]
 
 [[package]]
