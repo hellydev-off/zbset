@@ -40,10 +40,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     username = models.CharField(
-    max_length=30,
+    max_length=50,
     unique=True,
     )
-    phone_number = PhoneNumberField(blank=True, unique=True)
+    # blank=True без null=True писало '' всем, кому не задали номер — а '' с
+    # unique=True сталкивались друг с другом на втором же пользователе
+    # (IntegrityError). null=True даёт NULL, который unique не считает дублем.
+    phone_number = PhoneNumberField(blank=True, null=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
