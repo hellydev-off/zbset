@@ -16,6 +16,7 @@ dependencies = [
     "psycopg-binary>=3.3.5",
     "pyjwt>=2.14.0",
     "gunicorn>=23.0.0",
+    "django-cors-headers>=4.9.0",
 ]
 
 [tool.uv]
