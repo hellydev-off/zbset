@@ -31,6 +31,50 @@ services:
 
     restart: unless-stopped
 
+  messaging-service:
+    build:
+      context: ../services/messaging-service-express
+      dockerfile: Dockerfile
+
+    container_name: zbset-messaging-service
+
+    volumes:
+      - messaging_storage:/app/storage
+
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      JWT_SECRET: ${MESSAGING_JWT_SECRET:-supersecretkey}
+      JWT_EXPIRES: "24h"
+      NODE_ENV: production
+      LOG_LEVEL: info
+
+    ports:
+      - "127.0.0.1:3001:3000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    restart: unless-stopped
+
+  messaging-frontend:
+    build:
+      context: ../services/messaging-frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_ORIGIN}/api
+        VITE_SOCKET_URL: ${PUBLIC_ORIGIN}
+
+    container_name: zbset-messaging-frontend
+
+    ports:
+      - "127.0.0.1:3002:80"
+
+    depends_on:
+      - messaging-service
+
+    restart: unless-stopped
+
   postgres:
     image: postgres:18
 
@@ -58,3 +102,4 @@ volumes:
   core_service_venv:
   static_volume:
   media_volume:
+  messaging_storage:
