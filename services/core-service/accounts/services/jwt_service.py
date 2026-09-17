@@ -1,77 +1,80 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from config.settings import JWT_SECRET_KEY
+from config.settings import (
+    JWT_ALGORITHM,
+    JWT_EXPOSE_ACCESS,
+    JWT_EXPOSE_REFRESH,
+    JWT_PRIVATE_KEY,
+    JWT_PUBLIC_KEY,
+)
+from django.core.exceptions import ValidationError
 
 
-class JWTService:
-    SECRET_KEY = JWT_SECRET_KEY
+def _create_token(user_id: str, type: str, expose: int, session_id=None) -> dict:
+    now = datetime.now(UTC)
 
-    def create_access_token(self, user_id: str, numeric_id: int = None):
-        now = datetime.now(UTC)
+    payload = {
+        "sub": user_id,
+        "type": type,
+        "exp": now + timedelta(minutes=expose),
+        "session_id": session_id or str(uuid.uuid4()),
+        "iss": "auth-service",
+    }
+    return payload
 
-        payload = {
-            "sub": user_id,
-            # messaging-service-express читает req.user.id как числовой
-            # sender_id/participant_id — кладём его же сюда, чтобы токен
-            # auth-service подходил и для мессенджера без правок на его стороне.
-            "id": numeric_id,
-            # messages.service.js читает data.user.roles[0] как sender_type —
-            # без этого поля падает с TypeError на любой реальной отправке
-            "roles": ["user"],
-            "type": "access",
-            "iat": now,
-            "exp": now + timedelta(minutes=15),
-            "iss": "auth-service",
-        }
 
-        return jwt.encode(payload, self.SECRET_KEY, "HS256")
+def _decode_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(
+            token,
+            JWT_PUBLIC_KEY,
+            JWT_ALGORITHM,
+        )
 
-    def decode_access_token(self, token: str) -> dict:
-        try:
-            payload = jwt.decode(
-                token,
-                self.SECRET_KEY,
-                "HS256",
-                issuer="auth-service",
-            )
+    except jwt.ExpiredSignatureError as exc:
+        raise ValueError("Token expired") from exc
 
-        except jwt.ExpiredSignatureError as exc:
-            raise ValueError("Token expired") from exc
+    except jwt.InvalidTokenError as exc:
+        raise ValueError("Invalid token") from exc
+    return payload
 
-        except jwt.InvalidTokenError as exc:
-            raise ValueError("Invalid token") from exc
 
-        if payload.get("type") != "access":
-            raise jwt.InvalidTokenError("Invalid token type")
-        return payload
+def create_access_token(user_id: str, session_id=None) -> str:
+    payload = _create_token(
+        user_id, type="access", expose=JWT_EXPOSE_ACCESS, session_id=session_id
+    )
 
-    def create_refresh_token(self, user_id: str, numeric_id: int = None) -> str:
-        now = datetime.now(UTC)
+    return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
 
-        payload = {
-            "sub": user_id,
-            # нужен и тут, чтобы RefreshView могла пробросить его в новый
-            # access-токен без похода в базу за пользователем
-            "id": numeric_id,
-            "type": "refresh",
-            "iat": now,
-            "exp": now + timedelta(days=7),
-            "iss": "auth-service",
-        }
 
-        return jwt.encode(payload, self.SECRET_KEY, "HS256")
+def decode_access_token(token: str) -> dict:
+    payload = _decode_token(token)
 
-    def decode_refresh_token(self, token: str) -> dict:
-        try:
-            payload = jwt.decode(token, self.SECRET_KEY, "HS256")
+    if payload.get("type") != "access":
+        raise jwt.InvalidTokenError("Invalid token type")
+    return payload
 
-        except jwt.ExpiredSignatureError as exc:
-            raise ValueError("Token expired") from exc
 
-        except jwt.InvalidTokenError as exc:
-            raise ValueError("Invalid token") from exc
+def create_refresh_token(user_id: str) -> str:
+    payload = _create_token(user_id, type="refresh", expose=JWT_EXPOSE_REFRESH)
 
-        if payload.get("type") != "refresh":
-            raise jwt.InvalidTokenError("Invalid token type")
-        return payload
+    return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
+
+
+def decode_refresh_token(token: str) -> dict:
+    payload = _decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise jwt.InvalidTokenError("Invalid token type")
+    return payload
+
+
+def update_access_token(refresh_token: str) -> str:
+    try:
+        payload = decode_refresh_token(refresh_token)
+    except jwt.PyJWKError:
+        msg = "Invalid Token"
+        raise ValidationError(msg)
+    return create_access_token(payload["sub"])

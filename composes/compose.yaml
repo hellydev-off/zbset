@@ -19,8 +19,8 @@ services:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
 
-    ports:
-      - "127.0.0.1:8000:8000"
+    expose:
+      - "8000"
 
     env_file:
       - ../.env
@@ -43,8 +43,6 @@ services:
 
     environment:
       DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@postgres:5432/messaging
-      # общий секрет с core-service (Django JWT_SECRET_KEY) — токены
-      # auth-service должны верифицироваться и здесь тем же ключом
       JWT_SECRET: ${JWT_SECRET_KEY}
       JWT_EXPIRES: "24h"
       NODE_ENV: production
