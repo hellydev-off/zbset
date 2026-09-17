@@ -84,3 +84,22 @@ export async function unPinMessage(chat_id) {
     },
   });
 }
+
+export async function changePinChat(chatId, station) {
+  return await prisma.chats.update({
+    where: { id: chatId },
+    data: {
+      is_pin: station,
+    },
+  });
+}
+
+export async function deleteChatHistory(chat_id) {
+  return prisma.chats.update({
+    where: { id: chat_id },
+    data: {
+      last_message: {},
+      pin_message: {},
+    },
+  });
+}

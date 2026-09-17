@@ -9,5 +9,7 @@ const router = Router();
 // router.post("/", validate(createUserSchema), controller.createUser);
 router.get("/", controller.getChats);
 router.post("/create", validate(createChatSchema), controller.createChat);
+router.post("/changePin", controller.changePinChat);
+router.post("/deleteChatHistory", controller.deleteChatMessages);
 
 export default router;

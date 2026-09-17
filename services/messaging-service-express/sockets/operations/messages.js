@@ -172,3 +172,35 @@ export async function changeViewed({ messageId, chatId, socket, io }) {
     });
   }
 }
+
+export async function addAnswerMessage({
+  chatId,
+  messageId,
+  messageAnswerId,
+  sender_id,
+  text,
+  content,
+  socket,
+  io,
+}) {
+  try {
+    const addAnswerMessage = await messageService.addAnswerMessage(
+      messageId,
+      messageAnswerId,
+      sender_id,
+      text,
+      content,
+    );
+
+    const participantIds = await chatService.getChatParticipantIds(chatId);
+    io.to(participantIds.map((id) => `user:${id}`)).emit(
+      "message:add_answer",
+      addAnswerMessage,
+    );
+  } catch (err) {
+    socket.emit("error", {
+      message: err.message,
+      code: err.code || "INTERNAL",
+    });
+  }
+}

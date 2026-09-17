@@ -30,3 +30,9 @@ export class ForbiddenError extends AppError {
     super(message, 403, "FORBIDDEN");
   }
 }
+
+export class UnsupportedFileTypeError extends AppError {
+  constructor(message = "Неподдерживаемый тип файла") {
+    super(message, 415, "UNSUPPORTED_FILE_TYPE");
+  }
+}

@@ -28,6 +28,10 @@ function getChatMessagesDevProxy(apiBaseUrl) {
             headers: {
               "Content-Type": "application/json",
               "Content-Length": Buffer.byteLength(body),
+              // authenticateToken теперь требует Bearer-токен на всех REST-роутах
+              ...(req.headers.authorization
+                ? { Authorization: req.headers.authorization }
+                : {}),
             },
           },
           (proxyRes) => {

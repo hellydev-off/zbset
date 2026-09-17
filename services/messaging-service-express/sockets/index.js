@@ -9,6 +9,7 @@ import {
   updateMessage,
   updateReaction,
   changeViewed,
+  addAnswerMessage,
 } from "./operations/messages.js";
 
 export function initSocket(httpServer) {
@@ -62,6 +63,29 @@ export function initSocket(httpServer) {
     socket.on("message:is_viewed", async ({ chatId, messageId }) => {
       await changeViewed({ chatId, messageId, socket, io });
     });
+
+    socket.on(
+      "message:add_answer",
+      async ({
+        chatId,
+        messageAnswerId,
+        sender_id,
+        text,
+        content,
+        messageId,
+      }) => {
+        await addAnswerMessage({
+          chatId,
+          messageId,
+          messageAnswerId,
+          sender_id,
+          text,
+          content,
+          socket,
+          io,
+        });
+      },
+    );
 
     socket.on("typing:start", ({ chatId }) => {
       socket.to(`chat:${chatId}`).emit("typing:start", { userId });
