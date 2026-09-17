@@ -1,67 +1,69 @@
+import uuid
 from datetime import UTC, datetime, timedelta
 
 import jwt
-from config.settings import JWT_SECRET_KEY
+from config.settings import (
+    JWT_ALGORITHM,
+    JWT_EXPOSE_ACCESS,
+    JWT_EXPOSE_REFRESH,
+    JWT_PRIVATE_KEY,
+    JWT_PUBLIC_KEY,
+)
 
 
-class JWTService:
-    SECRET_KEY = JWT_SECRET_KEY
+def _create_token(user_id: str, now: datetime, type: str, expose: int) -> dict:
+    payload = {
+        "sub": user_id,
+        "type": type,
+        "exp": now + timedelta(minutes=expose),
+        "session_id": str(uuid.uuid4()),
+        "iss": "auth-service",
+    }
+    return payload
 
-    def create_access_token(self, user_id: str):
-        now = datetime.now(UTC)
 
-        payload = {
-            "sub": user_id,
-            "type": "access",
-            "iat": now,
-            "exp": now + timedelta(minutes=15),
-            "iss": "auth-service",
-        }
+def _decode_token(token: str) -> dict:
+    try:
+        payload = jwt.decode(
+            token,
+            JWT_PUBLIC_KEY,
+            JWT_ALGORITHM,
+        )
 
-        return jwt.encode(payload, self.SECRET_KEY, "HS256")
+    except jwt.ExpiredSignatureError as exc:
+        raise ValueError("Token expired") from exc
 
-    def decode_access_token(self, token: str) -> dict:
-        try:
-            payload = jwt.decode(
-                token,
-                self.SECRET_KEY,
-                "HS256",
-                issuer="auth-service",
-            )
+    except jwt.InvalidTokenError as exc:
+        raise ValueError("Invalid token") from exc
+    return payload
 
-        except jwt.ExpiredSignatureError as exc:
-            raise ValueError("Token expired") from exc
 
-        except jwt.InvalidTokenError as exc:
-            raise ValueError("Invalid token") from exc
+def create_access_token(user_id: str) -> str:
+    now = datetime.now(UTC)
+    payload = _create_token(user_id, now, type="access", expose=JWT_EXPOSE_ACCESS)
 
-        if payload.get("type") != "access":
-            raise jwt.InvalidTokenError("Invalid token type")
-        return payload
+    return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
 
-    def create_refresh_token(self, user_id: str) -> str:
-        now = datetime.now(UTC)
 
-        payload = {
-            "sub": user_id,
-            "type": "refresh",
-            "iat": now,
-            "exp": now + timedelta(days=7),
-            "iss": "auth-service",
-        }
+def decode_access_token(token: str) -> dict:
+    payload = _decode_token(token)
 
-        return jwt.encode(payload, self.SECRET_KEY, "HS256")
+    if payload.get("type") != "access":
+        raise jwt.InvalidTokenError("Invalid token type")
+    return payload
 
-    def decode_refresh_token(self, token: str) -> dict:
-        try:
-            payload = jwt.decode(token, self.SECRET_KEY, "HS256")
 
-        except jwt.ExpiredSignatureError as exc:
-            raise ValueError("Token expired") from exc
+def create_refresh_token(user_id: str) -> str:
+    now = datetime.now(UTC)
 
-        except jwt.InvalidTokenError as exc:
-            raise ValueError("Invalid token") from exc
+    payload = _create_token(user_id, now, type="refresh", expose=JWT_EXPOSE_REFRESH)
 
-        if payload.get("type") != "refresh":
-            raise jwt.InvalidTokenError("Invalid token type")
-        return payload
+    return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
+
+
+def decode_refresh_token(token: str) -> dict:
+    payload = _decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise jwt.InvalidTokenError("Invalid token type")
+    return payload
