@@ -10,6 +10,7 @@ services:
 
     volumes:
       - ../services/core-service:/app
+      - ../contracts/dev-keys:/app/keys:ro
       - core_service_venv:/app/.venv
 
     ports:

@@ -1,7 +1,12 @@
 import uuid
+
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from phonenumber_field.modelfields import PhoneNumberField
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, username, password=None, **extra_fields):
@@ -27,27 +32,41 @@ class UserManager(BaseUserManager):
         return super_user
 
 
-        
+class UserStatus(models.TextChoices):
+    ACTIVE = "Active", "active"
+    BANNED = "Banned", "banned"
+    IN_VERIFICATION = "In_verification", "in_verification"
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(
-    primary_key=True,
-    default=uuid.uuid4,
-    editable=False,
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
     )
 
     email = models.EmailField(
-    unique=True,
+        unique=True,
     )
 
-    username = models.CharField(
-    max_length=30,
-    unique=True,
+    status = models.CharField(
+        choices=UserStatus.choices,
+        default=UserStatus.ACTIVE,
     )
-    phone_number = PhoneNumberField(blank=True, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+    username = models.CharField(
+        unique=True,
+        max_length=30,
+    )
 
     objects = UserManager()
-    
+
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    REQUIRED_FIELDS = []

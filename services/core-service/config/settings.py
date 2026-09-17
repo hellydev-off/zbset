@@ -5,7 +5,13 @@ from environs import Env
 env = Env()
 env.read_env()
 BASE_DIR = Path(__file__).resolve().parent.parent
-JWT_SECRET_KEY = env.str("JWT_SECRET_KEY")
+
+# JWT
+JWT_PRIVATE_KEY = (BASE_DIR / "keys/dev-jwt-private.pem").read_text()
+JWT_PUBLIC_KEY = (BASE_DIR / "keys/dev-jwt-public.pem").read_text()
+JWT_EXPOSE_REFRESH = env.int("JWT_EXPOSE_REFRESH")
+JWT_EXPOSE_ACCESS = env.int("JWT_EXPOSE_ACCESS")
+JWT_ALGORITHM = env.str("JWT_ALGORITHM")
 
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
@@ -25,6 +31,8 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = "accounts.User"
 
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

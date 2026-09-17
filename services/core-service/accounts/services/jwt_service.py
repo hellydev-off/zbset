@@ -9,14 +9,17 @@ from config.settings import (
     JWT_PRIVATE_KEY,
     JWT_PUBLIC_KEY,
 )
+from django.core.exceptions import ValidationError
 
 
-def _create_token(user_id: str, now: datetime, type: str, expose: int) -> dict:
+def _create_token(user_id: str, type: str, expose: int, session_id=None) -> dict:
+    now = datetime.now(UTC)
+
     payload = {
         "sub": user_id,
         "type": type,
         "exp": now + timedelta(minutes=expose),
-        "session_id": str(uuid.uuid4()),
+        "session_id": session_id or str(uuid.uuid4()),
         "iss": "auth-service",
     }
     return payload
@@ -38,9 +41,10 @@ def _decode_token(token: str) -> dict:
     return payload
 
 
-def create_access_token(user_id: str) -> str:
-    now = datetime.now(UTC)
-    payload = _create_token(user_id, now, type="access", expose=JWT_EXPOSE_ACCESS)
+def create_access_token(user_id: str, session_id=None) -> str:
+    payload = _create_token(
+        user_id, type="access", expose=JWT_EXPOSE_ACCESS, session_id=session_id
+    )
 
     return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
 
@@ -54,9 +58,7 @@ def decode_access_token(token: str) -> dict:
 
 
 def create_refresh_token(user_id: str) -> str:
-    now = datetime.now(UTC)
-
-    payload = _create_token(user_id, now, type="refresh", expose=JWT_EXPOSE_REFRESH)
+    payload = _create_token(user_id, type="refresh", expose=JWT_EXPOSE_REFRESH)
 
     return jwt.encode(payload, JWT_PRIVATE_KEY, JWT_ALGORITHM)
 
@@ -67,3 +69,12 @@ def decode_refresh_token(token: str) -> dict:
     if payload.get("type") != "refresh":
         raise jwt.InvalidTokenError("Invalid token type")
     return payload
+
+
+def update_access_token(refresh_token: str) -> str:
+    try:
+        payload = decode_refresh_token(refresh_token)
+    except jwt.PyJWKError:
+        msg = "Invalid Token"
+        raise ValidationError(msg)
+    return create_access_token(payload["sub"])
