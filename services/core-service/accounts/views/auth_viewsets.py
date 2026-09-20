@@ -1,17 +1,19 @@
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from ..serializers.auth import (
+    ChangePasswordSerializer,
     RefreshTokenSerializer,
     TokenResponseSerializer,
     UserLoginSerializer,
     UserRegistrationSerializer,
     UserResponseSerializer,
 )
-from ..services.auth_service import login, register
+from ..services.auth_service import change_password, login, register
 from ..services.refresh_token_service import refresh, revoke_token
 
 
@@ -74,3 +76,21 @@ class AuthViewSet(ViewSet):
         revoke_token(user_data.validated_data["refresh_token"])
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["post"], permission_classes=[IsAuthenticated])
+    def change_password(self, request: Request):
+        user_data = ChangePasswordSerializer(data=request.data)
+        user_data.is_valid(raise_exception=True)
+
+        change_password(
+            user=request.user,
+            old_password=user_data.validated_data["old_password"],
+            new_password=user_data.validated_data["new_password"],
+            access_token=request.auth,
+        )
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def me(self, request: Request):
+        return Response(UserResponseSerializer(request.user).data)

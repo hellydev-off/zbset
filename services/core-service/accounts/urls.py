@@ -12,4 +12,5 @@ router.register(
 
 urlpatterns = [
     path("", include(router.urls)),
+    path("me/", AuthViewSet.as_view({"get": "me"}), name="me"),
 ]
