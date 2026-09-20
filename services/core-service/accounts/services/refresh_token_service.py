@@ -37,6 +37,12 @@ def revoke_token(refresh_token: str):
     token.save(update_fields=["revoked"])
 
 
+def revoke_other_tokens(user: User, current_session_id: str) -> None:
+    RefreshToken.objects.filter(user=user).exclude(
+        session_id=current_session_id
+    ).update(revoked=True)
+
+
 def refresh(refresh_token: str) -> str:
     payload = decode_refresh_token(refresh_token)
 

@@ -30,9 +30,17 @@ INSTALLED_APPS = [
     # 'content',
 ]
 
-# фронтенд (Vite dev-сервер локально, продовый ориджин на сервере) обращается
-# сюда напрямую по /auth/ с другого origin — без этого браузер режет запросы
-# ещё на preflight
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "accounts.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+    "EXCEPTION_HANDLER": "accounts.exceptions.custom_exception_handler",
+}
+
+
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
     default=["http://localhost:5173", "http://127.0.0.1:5173"],

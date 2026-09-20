@@ -1,11 +1,15 @@
+import uuid
+
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
 from ..models import User
 from ..services.jwt_service import (
     create_access_token,
     create_refresh_token,
+    decode_access_token,
 )
-from .refresh_token_service import save_refresh_token
+from .refresh_token_service import revoke_other_tokens, save_refresh_token
 
 
 def register(email: str, username: str, password: str) -> User:
@@ -24,8 +28,10 @@ def register(email: str, username: str, password: str) -> User:
 def login(email: str, password: str) -> dict:
     user = auth_user(email, password)
 
-    access_token = create_access_token(str(user.id))
-    refresh_token = create_refresh_token(str(user.id))
+    session_id = str(uuid.uuid4())
+
+    access_token = create_access_token(str(user.id), session_id)
+    refresh_token = create_refresh_token(str(user.id), session_id)
 
     save_refresh_token(user, refresh_token)
 
@@ -53,3 +59,22 @@ def auth_user(email: str, password: str) -> User:
         raise ValidationError("User is inactive")
 
     return user
+
+
+def change_password(
+    user: User,
+    old_password: str,
+    new_password: str,
+    access_token: str,
+) -> None:
+    if not user.check_password(old_password):
+        msg = "Old password is incorrect"
+        raise ValidationError(msg)
+
+    validate_password(new_password, user=user)
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+
+    payload = decode_access_token(access_token)
+    revoke_other_tokens(user, payload["session_id"])
